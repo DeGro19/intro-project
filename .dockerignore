@@ -1,0 +1,32 @@
+# Exclude node_modules - we'll install fresh dependencies in the container
+node_modules
+
+# Exclude npm debug logs
+npm-debug.log
+
+# Exclude git files and folders
+.git
+.gitignore
+
+# Exclude IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Exclude documentation (optional - remove if you want README in container)
+readme.md
+README.md
+
+# Exclude test files if not needed in production
+test
+*.test.js
+*.spec.js
+
+# Exclude Docker files themselves
+Dockerfile
+.dockerignore
+
+# Exclude OS-specific files
+.DS_Store
+Thumbs.db
