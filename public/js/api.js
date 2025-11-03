@@ -1,5 +1,3 @@
-
-
 const rooturl = `${window.location.protocol}//${window.location.host}/api/`
 
 /**
@@ -25,7 +23,7 @@ export async function getdata( api ) {
 }
 
 /**
- * TODO check result
+ * Wrapper for all API PUT requests (Add/Update)
  * @param { string } api
  * @param { object } data
  * @returns { Promise }
@@ -40,6 +38,36 @@ export async function putdata( api, data ) {
   }
 
   const url = rooturl + api
-  await fetch( url, request )
+  const response = await fetch( url, request )
+  
+  if( !response.ok ) {
+    throw new Error( `PUT request failed with status: ${response.status}` )
+  }
+  
+  return await response.json()
 }
 
+/**
+ * Wrapper for all API DELETE requests
+ * @param { string } api
+ * @param { object } data
+ * @returns { Promise }
+ */
+export async function deletedata( api, data ) {
+  const request = {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify( data )
+  }
+
+  const url = rooturl + api
+  const response = await fetch( url, request )
+  
+  if( !response.ok ) {
+    throw new Error( `DELETE request failed with status: ${response.status}` )
+  }
+  
+  return await response.json()
+}

@@ -1,105 +1,138 @@
+// ===============================
+// Property Manager Form Handling
+// ===============================
 
+// Global callback for when a form is submitted successfully
+let formsubmitcallback;
 
-let formsubmitcallback
-document.addEventListener( "DOMContentLoaded", async function() {
+// Ensure DOM is ready before event bindings
+document.addEventListener("DOMContentLoaded", async function () {
 
-  const closeelements = document.querySelectorAll( ".close" )
-  closeelements.forEach( element => {
-    element.addEventListener( "click", ( e ) => {
-      e.preventDefault()
-      closallforms()
-    } )
-  } )
+  // Attach close functionality to all Cancel buttons
+  const closeelements = document.querySelectorAll(".close");
+  closeelements.forEach(element => {
+    element.addEventListener("click", (e) => {
+      e.preventDefault();
+      closallforms();
+    });
+  });
 
-  const formelements = document.querySelectorAll( "form" )
-  formelements.forEach( element => {
-    element.addEventListener( "submit", ( e ) => {
-      e.preventDefault()
+  // Handle all form submissions
+  const formelements = document.querySelectorAll("form");
+  formelements.forEach(element => {
+    element.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-      document.getElementById( "content" ).style.display = "block"
-      // @ts-ignore (it is part of HTML Element)
-      element.parentNode.style.display = "none"
+      // Close the overlay correctly (hide modal + overlay)
+      const overlay = element.closest(".modal-overlay");
+      if (overlay) overlay.style.display = "none";
 
-      if( formsubmitcallback ) formsubmitcallback()
-    } )
-  } )
-} )
+      // Show main content again
+      document.getElementById("content").style.display = "block";
+
+      // Execute callback if defined
+      if (formsubmitcallback) formsubmitcallback();
+
+      // Clear the form after submission
+      element.reset();
+    });
+  });
+});
+
+// ====================================
+// Utility Functions
+// ====================================
 
 /**
- * Hide all divs with class container and show main content
+ * Hide all open modals and restore main content
  */
 function closallforms() {
-  document.querySelectorAll( "div.container" ).forEach( ( element ) => {
-    // @ts-ignore
-    element.style.display = "none"
-  } )
-  document.getElementById( "content" ).style.display = "block"
+  document.querySelectorAll(".modal-overlay").forEach((element) => {
+    element.style.display = "none";
+  });
+  document.getElementById("content").style.display = "block";
 }
 
 /**
- * Show form by id name
- * @param { string } formid 
+ * Show a specific form modal by its ID
+ * @param {string} formid - The HTML id of the form overlay div
+ * @param {Function} onsubmit - Callback to execute after successful form submission
  */
-export function showform( formid, onsubmit ) {
-  document.getElementById( "content" ).style.display = "none"
+export function showform(formid, onsubmit) {
+  // Hide main content
+  document.getElementById("content").style.display = "none";
 
-  const form = document.getElementById( formid )
-  form.style.display = "block"
-
-  formsubmitcallback = onsubmit
-}
-
-/**
- * 
- * @param { string } formitemid 
- */
-export function getformfieldvalue( formitemid ) {
-  // @ts-ignore (it does!)
-  return document.getElementById( formitemid ).value
-}
-
-/**
- * 
- * @param { string } formitemid
- * @param { string } value
- */
-export function setformfieldvalue( formitemid, value ) {
-  // @ts-ignore (it does!)
-  document.getElementById( formitemid ).value = value
-}
-
-
-/**
- * 
- * @param { string } formid 
- */
-export function clearform( formid ) {
-  const form = document.getElementById( formid )
-
-  form.querySelectorAll( "input" ).forEach( ( input ) => input.value = "" )
-  form.querySelectorAll( "textarea" ).forEach( ( input ) => input.value = "" )
-}
-
-/**
- * 
- * @param { string } formid
- * @returns { HTMLTableSectionElement }
- */
-export function gettablebody( formid ) {
-  return document.getElementById( formid ).getElementsByTagName( "tbody" )[ 0 ]
-}
-
-/**
- * 
- * @param { string } formid 
- */
-export function cleartablerows( formid ) {
-  
-  const table = document.getElementById( formid )
-
-  const rows = table.getElementsByTagName( "tr" )
-  for( let i = rows.length - 1; i > 0; i-- ) {
-    // @ts-ignore
-    table.deleteRow( i )
+  // Show specific modal overlay
+  const form = document.getElementById(formid);
+  if (form) {
+    form.style.display = "flex"; // ensures center alignment via flexbox
   }
+
+  // Set the global callback for when this form is submitted
+  formsubmitcallback = onsubmit;
+}
+
+/**
+ * Get the current value of an input field or textarea
+ * @param {string} formitemid
+ * @returns {string}
+ */
+export function getformfieldvalue(formitemid) {
+  const field = document.getElementById(formitemid);
+  return field ? field.value : "";
+}
+
+/**
+ * Set a value for an input field or textarea
+ * @param {string} formitemid
+ * @param {string} value
+ */
+export function setformfieldvalue(formitemid, value) {
+  const field = document.getElementById(formitemid);
+  if (field) field.value = value;
+}
+
+/**
+ * Clear all input and textarea fields inside a given form
+ * @param {string} formid
+ */
+export function clearform(formid) {
+  const form = document.getElementById(formid);
+  if (!form) return;
+
+  form.querySelectorAll("input").forEach(input => input.value = "");
+  form.querySelectorAll("textarea").forEach(input => input.value = "");
+}
+
+/**
+ * Get the <tbody> element of a table
+ * @param {string} formid
+ * @returns {HTMLTableSectionElement|null}
+ */
+export function gettablebody(formid) {
+  const table = document.getElementById(formid);
+  return table ? table.getElementsByTagName("tbody")[0] : null;
+}
+
+/**
+ * Clear all table rows (except header)
+ * @param {string} formid
+ */
+export function cleartablerows(formid) {
+  const table = document.getElementById(formid);
+  if (!table) return;
+
+  const rows = table.getElementsByTagName("tr");
+  for (let i = rows.length - 1; i > 0; i--) {
+    table.deleteRow(i);
+  }
+}
+
+function fadeOutModal(overlay) {
+  overlay.style.transition = "opacity 0.25s ease";
+  overlay.style.opacity = "0";
+  setTimeout(() => {
+    overlay.style.display = "none";
+    overlay.style.opacity = "1";
+  }, 250);
 }
